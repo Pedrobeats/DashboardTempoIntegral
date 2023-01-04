@@ -5,6 +5,7 @@ from PIL import Image
 from st_aggrid import AgGrid
 import numpy as np
 import openpyxl
+import plotly.express as px
 
 ######## Variáveis #######
 banner = Image.open('imagens/bannerTI2.png')
@@ -111,9 +112,19 @@ elif tipo_relatorio == 'Relatório Geral de Matrículas do Tempo Integral':
     conteudo_grafico = st.selectbox(
         'Qual dado gostaria de ver?',
         ('Municipio', 'Escola', 'Serie', 'Turno', 'TipoEnsino'))
-    st.bar_chart(st.session_state.df2, x=conteudo_grafico, y='TotalMatriculados')
+
+    #Gráfico via Pandas
+    # st.bar_chart(st.session_state.df2, x=conteudo_grafico, y='TotalMatriculados')
+
     soma2 = st.session_state.df2[[conteudo_grafico, 'TotalMatriculados']]
     soma2 = soma2.groupby([conteudo_grafico]).sum()
     soma2 = soma2.reset_index()
+
+    #Gráfico Via Plotly
+    grafico_px = px.histogram(st.session_state.df2, x=conteudo_grafico,
+                                                 color=conteudo_grafico,
+                                                 text_auto=True).update_xaxes(categoryorder='total descending')
+    st.plotly_chart(grafico_px)
+
     AgGrid(soma2, fit_columns_on_grid_load=True)
 

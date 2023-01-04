@@ -74,19 +74,19 @@ if menu_geral == 'Informações Gerais sobre o Tempo Integral':
     dfbase = st.session_state['df4']
     dfmatriculas = st.session_state.df2
 
-    with st.sidebar.expander("Filtrar por Regional(ais):"):
+    with st.expander("Filtrar por Regional(ais):"):
         escolha_regional = st.multiselect(
             'Escolha a(s) Regional(ais):',
             dfbase['REGIONAL'].unique(),default=dfbase['REGIONAL'].unique())
     dfmapa = dfbase.loc[dfbase['REGIONAL'].isin(escolha_regional)]
-    with st.sidebar.expander("Filtrar por ano de Implantação:", expanded=True):
+    with st.expander("Filtrar por ano de Implantação:", expanded=True):
         selecao_ano_implantacao = st.select_slider('Ano de Implantação',
                                                    options=dfbase['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].unique(), value=dfbase['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].unique().max())
     lista_selecao_ano_implantacao = []
     lista_selecao_ano_implantacao.append(selecao_ano_implantacao)
     dfmapa = dfmapa.loc[dfmapa['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].isin(lista_selecao_ano_implantacao)]
     qt_implantadas = str(len(dfbase[dfbase['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'] <= selecao_ano_implantacao]))
-
+    st.subheader('Panorama')
     ###### Colunas para organizar #####
     col1, col2 = st.columns(2)
     with col1:
@@ -110,10 +110,9 @@ if menu_geral == 'Informações Gerais sobre o Tempo Integral':
                 for itemmun in lista_mun_ate:
                     st.write(itemmun)
 
-
-
-
     with col2:
+        dfmapa['COORDY'] = dfmapa['COORDY'].astype(str)
+        dfmapa['COORDX'] = dfmapa['COORDX'].astype(str)
         # MAPA: Cria e centraliza em São Pedro, a primeira escola
         m = folium.Map(location=[-20.2866, -40.3372], zoom_start=6)
         for index, escola in dfmapa.iterrows():
@@ -123,7 +122,7 @@ if menu_geral == 'Informações Gerais sobre o Tempo Integral':
             ).add_to(m)
         # Renderiza o Mapa
         st_data = st_folium(m, width=300, height=300)
-        st.caption(" (Clique no ícone da escola para ver o telefone)")
+
         # Fim do MAPA#
 
     ################# FIM DAS COLUNAS #################
@@ -138,6 +137,7 @@ if menu_geral == 'Informações Gerais sobre o Tempo Integral':
 
     st.subheader("Escolas Implantadas por Regional até {}".format(selecao_ano_implantacao))
     grafico_qt_escola_regional = px.histogram(dfgraficos, x='REGIONAL', color='REGIONAL', text_auto=True).update_xaxes(categoryorder='total descending')
+    grafico_qt_escola_regional.update_layout(yaxis_title="Escolas Implantadas")
     st.plotly_chart(grafico_qt_escola_regional)
 
 
@@ -145,12 +145,14 @@ if menu_geral == 'Informações Gerais sobre o Tempo Integral':
 
     st.subheader("Escolas Implantadas por Turno até {}".format(selecao_ano_implantacao))
     grafico_qt_escola_turno = px.histogram(dfgraficos, x='TURNO(S)', color='TURNO(S)', text_auto=True).update_xaxes(categoryorder='total descending')
+    grafico_qt_escola_turno.update_layout(yaxis_title="Escolas Implantadas")
     st.plotly_chart(grafico_qt_escola_turno)
 
     ######## INICIO GRÁFICO QUANTIDADE DE MODALIDADES INTEGRAL####
     st.subheader("Escolas Implantadas por Modalidade até {}".format(selecao_ano_implantacao))
     grafico_qt_escola_modalidades = px.histogram(dfgraficos, x='MODALIDADES INTEGRAL (Propedeutica/Técnica/Mista)',
                                                  color='MODALIDADES INTEGRAL (Propedeutica/Técnica/Mista)', text_auto=True).update_xaxes(categoryorder='total descending')
+    grafico_qt_escola_modalidades.update_layout(yaxis_title="Escolas Implantadas")
     st.plotly_chart(grafico_qt_escola_modalidades)
 
 
@@ -158,6 +160,7 @@ if menu_geral == 'Informações Gerais sobre o Tempo Integral':
     st.subheader("Escolas Implantadas por Oferta até {}".format(selecao_ano_implantacao))
     grafico_qt_escola_oferta = px.histogram(dfgraficos, x='OFERTA DE TEMPO INTEGRAL',
                                                  color='OFERTA DE TEMPO INTEGRAL', text_auto=True).update_xaxes(categoryorder='total descending')
+    grafico_qt_escola_oferta.update_layout(yaxis_title="Escolas Implantadas")
     st.plotly_chart(grafico_qt_escola_oferta)
 
 
@@ -208,7 +211,7 @@ elif menu_geral == 'Lista de Telefones/Contatos':
         with st.expander("Ver as informações da escola"):
             for col in ['Nome do Diretor', 'Telefone do diretor', 'Telefone alternativo do diretor', 'Nome do Coordenador pedagógico', 'Telefone do Coordenador Pedagógico',
                         'Nome do CASF', 'Telefone do CASF', 'Email da escola','Telefone da Escola', 'Superintendente', 'Telefone do Superintendente',
-                             'Email do Superintendente', 'Assessor Pedagógico', 'Telefone Assessor Pedagógico', 'Email assessor pedagógico', 'Supervisor do Tempo Integral', 'Telefone do Supervisor do Tempo Integral', 'Email do Supervisor do Tempo Integral',
+                             'Email do Superintendente', 'Supervisor do Tempo Integral', 'Telefone do Supervisor do Tempo Integral', 'Email do Supervisor do Tempo Integral',
                              ]:
                 st.subheader(col)
                 st.write(contatos_filtrados_renomeados.loc[contatos_filtrados_renomeados['ESCOLA'].str.contains(escola, na=False)][col].to_string()[3:])
@@ -221,22 +224,45 @@ elif menu_geral == 'Informação por Escola':
     dfmatriculas = st.session_state.df2
 
 
-    escolha_escola = st.sidebar.selectbox(
+    escolha_escola = st.selectbox(
         'Escolha a escola',
         dfbase['ESCOLA'].unique()
     )
+
+    col1,col2 = st.columns(2)
+
+    with col1:
+        st.write("lero")
+
+    with col2:
+        mapa_info_escola = st.session_state['df4']
+
+        mapa_info_escola['COORDY'] = mapa_info_escola['COORDY'].astype(str).replace(",", ".")
+        mapa_info_escola['COORDX'] = mapa_info_escola['COORDX'].astype(str).replace(",", ".")
+
+        # centraliza em São Pedro
+        m = folium.Map(location=[mapa_info_escola.query(f'ESCOLA == "{escolha_escola}"')['COORDY'], mapa_info_escola.query(f'ESCOLA == "{escolha_escola}"')['COORDX']], zoom_start=12)
+        # adiciona o marcador
+
+        folium.Marker(
+            [mapa_info_escola.query(f'ESCOLA == "{escolha_escola}"')['COORDY'], mapa_info_escola.query(f'ESCOLA == "{escolha_escola}"')['COORDX']], popup=mapa_info_escola.query(f'ESCOLA == "{escolha_escola}"')['ESCOLA'].values, tooltip=mapa_info_escola.query(f'ESCOLA == "{escolha_escola}"')['ESCOLA'].values
+        ).add_to(m)
+
+        # call to render Folium map in Streamlit
+        st_data = st_folium(m, width=300, height=300)
+
 
 
 #### Indicadores PAEBES ####
 elif menu_geral == 'Indicadores PAEBES':
     st.title('Indicadores PAEBES')
-    ## Selecionando/Filtrando Dataframe da PAD##
+    ## Selecionando/Filtrando Dataframe da PAEBES##
 
     dfpaebes = st.session_state.df4[['CÓD. INEP', 'REGIONAL', 'MUNICÍPIO', 'ESCOLA',
                                      'ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL',
                                      'MODALIDADES INTEGRAL (Propedeutica/Técnica/Mista)', 'CARGA HORÁRIA', 'TURNO(S)',
                                      'OFERTA DE TEMPO INTEGRAL', 'POSSUI CURSO TECNICO?', 'PROF PAEBES EF MAT 2019',
-                                     'PROF PAEBES EF MAT 2021', 'PROF PAEBES EF LP 2019 ', 'PROF PAEBES EF LP 2021 ',
+                                     'PROF PAEBES EF MAT 2021', 'PROF PAEBES EF LP 2019', 'PROF PAEBES EF LP 2021',
                                      'PROF PAEBES EF CN 2019', 'PROF PAEBES EF CN 2021', 'PROF PAEBES EM MAT 2019',
                                      'PROF PAEBES EM MAT 2021', 'PROF PAEBES EM LP 2019', 'PROF PAEBES EM LP 2021',
                                      'PROF PAEBES EM BIO 2019', 'PROF PAEBES EM BIO 2021', 'PROF PAEBES EM QUI 2019',
@@ -247,14 +273,12 @@ elif menu_geral == 'Indicadores PAEBES':
     menu_paebes = st.sidebar.radio("Tipo de relatório:",
              ('Visão Geral do PAEBES do Tempo Integral', 'PAEBES por Escola'))
     if menu_paebes == 'Visão Geral do PAEBES do Tempo Integral':
-        st.header('Média do PAEBES')
-
         #### Criação de Filtros ###
-        with st.sidebar.expander("Filtrar por regionais"):
+        with st.expander("Filtrar por regionais"):
             paebes_escolha_regional = st.multiselect('Selecione as regionais:',
     dfpaebes['REGIONAL'].unique(), dfpaebes['REGIONAL'].unique())
 
-        paebes_escolha_ano = st.sidebar.select_slider('Ano de Implantação:',
+        paebes_escolha_ano = st.select_slider('Ano de Implantação:',
     options=dfpaebes['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].unique(), value=dfpaebes['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].unique().max())
         dfpaebes_filtrado = dfpaebes.loc[dfpaebes['REGIONAL'].isin(paebes_escolha_regional)].reset_index(drop=True)
         lista_selecao_ano_implantacao = []
@@ -263,33 +287,124 @@ elif menu_geral == 'Indicadores PAEBES':
                 lista_selecao_ano_implantacao.append(item)
         dfpaebes_filtrado = dfpaebes_filtrado.loc[dfpaebes_filtrado['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].isin(
             lista_selecao_ano_implantacao)].reset_index(drop=True)
-
-
         ### Fim dos Filtros ###
 
         ## Criação da DF de resultados do PAEBES por REGIONAL ##
         df_paebes_media_regional = dfpaebes_filtrado.groupby(by=['REGIONAL']).mean().reset_index()
-        st.dataframe(df_paebes_media_regional.columns)
+
+        selecao_ano_paebes = st.radio('Selecione o ano:', ('2019', '2021'))
+
+        if selecao_ano_paebes == '2019':
+
+            st.subheader('PAEBES 2019 Ensino Médio - Média geral por regional')
+            fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='Média total EM PAEBES 2019', color='REGIONAL',
+                         text_auto=True).update_xaxes(categoryorder='total descending')
+            st.plotly_chart(fig)
+            st.subheader('PAEBES 2019 Ensino Médio - Proeficiência Média geral por componente curricular:')
+            tab2019EM1, tab2019EM2, tab2019EM3, tab2019EM4, tab2019EM5 = st.tabs(["Matemática",
+                                                                                  "Língua Portuguesa",
+                                                                                  "Biologia", "Química",
+                                                                                  "Física"])
+            with tab2019EM1:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EM MAT 2019', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2019EM2:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EM LP 2019', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2019EM3:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EM BIO 2019', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2019EM4:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EM QUI 2019', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2019EM5:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EM FIS 2019', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+
+            st.subheader('PAEBES 2019 Ensino Fundamental - Média geral por regional')
+            fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='Média total PAEBES EF 2019', color='REGIONAL',
+                         text_auto=True).update_xaxes(categoryorder='total descending')
+            st.plotly_chart(fig)
+
+            st.subheader('PAEBES 2019 Ensino Fundamental - Proeficiência Média geral por componente curricular:')
+            tab2019EF1, tab2019EF2, tab2019EF3 = st.tabs(["Matemática", "Língua Portuguesa", "Ciências da Natureza"])
+
+            with tab2019EF1:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EF MAT 2019', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2019EF2:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y="PROF PAEBES EF LP 2019", color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2019EF3:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EF CN 2019', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+
+        elif selecao_ano_paebes == '2021':
+            st.subheader('PAEBES 2021 Ensino Médio - Média geral por regional')
+            fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='Média total PAEBES EM 2021', color='REGIONAL',
+                         text_auto=True).update_xaxes(categoryorder='total descending')
+            st.plotly_chart(fig)
+
+            st.subheader('PAEBES 2021 Ensino Médio - Proeficiência Média geral por componente curricular:')
+            tab2021EM1, tab2021EM2, tab2021EM3, tab2021EM4, tab2021EM5 = st.tabs(["Matemática",
+                                                                                  "Língua Portuguesa",
+                                                                                  "Biologia", "Química",
+                                                                                  "Física"])
+            with tab2021EM1:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EM MAT 2021', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2021EM2:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EM LP 2021', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2021EM3:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EM BIO 2021', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2021EM4:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EM QUI 2021', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2021EM5:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EM FIS 2021', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
 
 
-        st.subheader('PAEBES 2019 Ensino Médio - Média geral por regional')
-        fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='Média total EM PAEBES 2019', color='REGIONAL', text_auto=True).update_xaxes(categoryorder='total descending')
-        st.plotly_chart(fig)
+            st.subheader('PAEBES 2021 Ensino Fundamental - Média geral por regional')
+            fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='Média total PAEBES EF 2021', color='REGIONAL',
+                         text_auto=True).update_xaxes(categoryorder='total descending')
+            st.plotly_chart(fig)
 
-        st.subheader('PAEBES 2019 Ensino Fundamental - Média geral por regional')
-        fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='Média total PAEBES EF 2019', color='REGIONAL',
-                     text_auto=True).update_xaxes(categoryorder='total descending')
-        st.plotly_chart(fig)
+            st.subheader('PAEBES 2021 Ensino Fundamental - Proeficiência Média geral por componente curricular:')
+            tab2021EF1, tab2021EF2, tab2021EF3 = st.tabs(["Matemática", "Língua Portuguesa", "Ciências da Natureza"])
+            with tab2021EF1:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EF MAT 2021', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2021EF2:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EF LP 2021', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
+            with tab2021EF3:
+                fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='PROF PAEBES EF CN 2021', color='REGIONAL',
+                             text_auto=True).update_xaxes(categoryorder='total descending')
+                st.plotly_chart(fig)
 
-        st.subheader('PAEBES 2021 Ensino Médio - Média geral por regional')
-        fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='Média total PAEBES EM 2021', color='REGIONAL',
-                     text_auto=True).update_xaxes(categoryorder='total descending')
-        st.plotly_chart(fig)
 
-        st.subheader('PAEBES 2021 Ensino Fundamental - Média geral por regional')
-        fig = px.bar(df_paebes_media_regional, x='REGIONAL', y='Média total PAEBES EF 2021', color='REGIONAL',
-                     text_auto=True).update_xaxes(categoryorder='total descending')
-        st.plotly_chart(fig)
+
+
+
+
 
 
 
