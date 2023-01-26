@@ -23,13 +23,13 @@ if 'df1' not in st.session_state:
             'https://dados.es.gov.br/dataset/05f98028-92ba-45ca-9210-cb000b03c979/resource/5dd7951a-51c0-40f6-8809-14690b1b69a5/download/dadosescola.csv',
             sep=";", engine='python')
         df_dadosescola.dropna(inplace=True)
-        df_dadosescola = df_dadosescola.loc[df_dadosescola['Ano'] >= 2022]
+        df_dadosescola = df_dadosescola.loc[df_dadosescola['Ano'] >= 2023]
         df_dadosescola = df_dadosescola.reset_index(drop=True)
         df_dadosescola = df_dadosescola.astype({'Inep': int})
         df_dadosmatricula = pd.read_csv(
             'https://dados.es.gov.br/dataset/05f98028-92ba-45ca-9210-cb000b03c979/resource/95ee26cf-aa81-4250-8c96-540aa32d1be5/download/dadosmatricula.csv',
             sep=";", engine='python')
-        df_dadosmatricula = df_dadosmatricula.loc[df_dadosmatricula['Ano'] >= 2022]
+        df_dadosmatricula = df_dadosmatricula.loc[df_dadosmatricula['Ano'] >= 2023]
         df_dadosmatricula = df_dadosmatricula.reset_index(drop=True)
         df_dadosmatricula = df_dadosmatricula.query(
             'TipoEnsino == "ENSINO FUNDAMENTAL - 9 ANOS" or TipoEnsino ==  "ENSINO MÉDIO" or TipoEnsino == "ENSINO MÉDIO INTEGRADO"')
@@ -119,10 +119,13 @@ elif tipo_relatorio == 'Relatório Geral de Matrículas do Tempo Integral':
     soma2 = soma2.reset_index()
 
     #Gráfico
+    st.subheader('Quantidade de Turmas')
     grafico_px = px.histogram(st.session_state.df2, x=conteudo_grafico,
                                                  color=conteudo_grafico,
                                                  text_auto=True).update_xaxes(categoryorder='total descending')
     st.plotly_chart(grafico_px)
 
+    st.subheader('Quantidade de Matrículas')
     AgGrid(soma2, fit_columns_on_grid_load=True)
+
 

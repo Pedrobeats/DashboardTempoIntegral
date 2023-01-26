@@ -27,13 +27,13 @@ if 'df1' not in st.session_state:
             'https://dados.es.gov.br/dataset/05f98028-92ba-45ca-9210-cb000b03c979/resource/5dd7951a-51c0-40f6-8809-14690b1b69a5/download/dadosescola.csv',
             sep=";", engine='python')
         df_dadosescola.dropna(inplace=True)
-        df_dadosescola = df_dadosescola.loc[df_dadosescola['Ano'] >= 2022]
+        df_dadosescola = df_dadosescola.loc[df_dadosescola['Ano'] >= 2023]
         df_dadosescola = df_dadosescola.reset_index(drop=True)
         df_dadosescola = df_dadosescola.astype({'Inep': int})
         df_dadosmatricula = pd.read_csv(
             'https://dados.es.gov.br/dataset/05f98028-92ba-45ca-9210-cb000b03c979/resource/95ee26cf-aa81-4250-8c96-540aa32d1be5/download/dadosmatricula.csv',
             sep=";", engine='python')
-        df_dadosmatricula = df_dadosmatricula.loc[df_dadosmatricula['Ano'] >= 2022]
+        df_dadosmatricula = df_dadosmatricula.loc[df_dadosmatricula['Ano'] >= 2023]
         df_dadosmatricula = df_dadosmatricula.reset_index(drop=True)
         df_dadosmatricula = df_dadosmatricula.query(
             'TipoEnsino == "ENSINO FUNDAMENTAL - 9 ANOS" or TipoEnsino ==  "ENSINO MÉDIO" or TipoEnsino == "ENSINO MÉDIO INTEGRADO"')
@@ -63,7 +63,7 @@ if 'df1' not in st.session_state:
 ##### Sidebar geral #####
 menu_geral = st.sidebar.radio(
     "Selecione o que deseja ver:",
-    ('Indicadores PAEBES', 'Indicadores SAEB', 'Indicadores IDEB', 'Indicadores PADI'))
+    ('Indicadores PAEBES', 'Indicadores SAEB', 'Indicadores IDEB', 'Indicadores PADI', 'Indicadores Socioeconômicos'))
 #### Fim sidebar geral ##
 
 #### Indicadores PAEBES ########################################################################
@@ -1405,7 +1405,7 @@ if menu_geral == 'Indicadores IDEB':
 if menu_geral == 'Indicadores PADI':
     st.title('Indicadores PADI')
     ## Selecionando/Filtrando Dataframe da PADI##
-    st.write(str(st.session_state.df4.columns))
+
     dfpadi = st.session_state.df4[['CÓD. INEP', 'REGIONAL', 'MUNICÍPIO', 'ESCOLA',
                                    'ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL',
                                    'MODALIDADES INTEGRAL (Propedeutica/Técnica/Mista)', 'CARGA HORÁRIA', 'TURNO(S)',
@@ -1414,9 +1414,6 @@ if menu_geral == 'Indicadores PADI':
                                    'PADI 2022.1 PERCEPCAO', 'PADI 2022.3 GERAL', 'PADI 2022.3 OPERACAO',
                                    'PADI 2022.3 MODELO', 'PADI 2022.3 GESTAO', 'PADI 2022.3 PERCEPCAO',
                                    'PADI ano 2022']]
-    st.dataframe(dfpadi)
-
-
 
     menu_padi = st.sidebar.radio("Tipo de relatório:",
                                  ('Visão Geral da PADI do Tempo Integral', 'Ranking das escolas',
@@ -1451,7 +1448,7 @@ if menu_geral == 'Indicadores PADI':
             fig.update_traces(marker_color='firebrick')
             st.plotly_chart(fig)
 
-            st.subheader('PADI 2022.1 - Média geral por das regionais por Eixo:')
+            st.subheader('PADI 2022.1 - Média geral das regionais por Eixo:')
             tab_operacao, tab_modelo, tab_gestao, tab_percepcao = st.tabs(["Eixo Operação",
                                                                                   "Eixo Modelo do Tempo Integral",
                                                                                   "Eixo Gestão",
@@ -1623,3 +1620,238 @@ if menu_geral == 'Indicadores PADI':
                     pass
                 else:
                     st.write(f"a escola está na posição {escola_posicao}, no {df_padi_indices}")
+
+        #Eixos da Padi:
+        def eixospadi(eixo20221, eixo20223):
+            fig = go.Figure()
+            fig.add_trace(go.Bar(x=dfpadi_filtrado['ESCOLA'], y=dfpadi_filtrado[eixo20221],
+                                 name="PADI 2022.1"))
+            fig.update_traces(marker_color='firebrick')
+            fig.add_trace(go.Bar(x=dfpadi_filtrado['ESCOLA'], y=dfpadi_filtrado[eixo20223],
+                                 name="PADI 2022.3"))
+            fig.update_xaxes(showticklabels=False)
+            st.plotly_chart(fig)
+
+            delta_float_str = float(dfpadi_filtrado[eixo20223].fillna(value=0) - dfpadi_filtrado[
+                eixo20221].fillna(value=0))
+            delta_float_str = str(delta_float_str)[:5]
+            delta_float_str = float(delta_float_str)
+            # Fim da Gambiarra#
+            st.metric('Variação entres as aplicações',
+                      value=dfpadi_filtrado[eixo20221],
+                      delta=delta_float_str)
+
+        tab1, tab2, tab3, tab4 = st.columns(4)
+        with tab1:
+            st.subheader('Operação:')
+            eixospadi('PADI 2022.1 OPERACAO', 'PADI 2022.3 OPERACAO')
+        with tab2:
+            st.subheader('Modelo:')
+            eixospadi('PADI 2022.1 MODELO', 'PADI 2022.3 MODELO')
+        with tab3:
+            st.subheader('Gestão:')
+            eixospadi('PADI 2022.1 GESTAO', 'PADI 2022.3 GESTAO')
+        with tab4:
+            st.subheader('Percepção:')
+            eixospadi('PADI 2022.1 PERCEPCAO', 'PADI 2022.3 PERCEPCAO')
+
+####################################### Indicadores Socioeconômicos #################################################
+
+if menu_geral == 'Indicadores Socioeconômicos':
+    st.title('Indicador Socioeconômico INSE')
+    ## Selecionando/Filtrando Dataframe da PADI##
+
+    dfsocioeconomico = st.session_state.df4[['CÓD. INEP', 'REGIONAL', 'MUNICÍPIO', 'ESCOLA',
+                                   'ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL',
+                                   'MODALIDADES INTEGRAL (Propedeutica/Técnica/Mista)', 'CARGA HORÁRIA', 'TURNO(S)',
+                                   'OFERTA DE TEMPO INTEGRAL', 'POSSUI CURSO TECNICO?', 'INSE_VALOR_ABSOLUTO',
+                                   'INSE_CLASSIFICACAO', 'PC_NIVEL_1', 'PC_NIVEL_2', 'PC_NIVEL_3', 'PC_NIVEL_4',
+                                   'PC_NIVEL_5', 'PC_NIVEL_6', 'PC_NIVEL_7', 'PC_NIVEL_8']]
+
+
+    menu_socioeconomico = st.sidebar.radio("Tipo de relatório:",
+                                 ('Visão Geral do Tempo Integral', 'Ranking das escolas',
+                                  'Socioeconomico por Escola'))
+    if menu_socioeconomico == 'Visão Geral do Tempo Integral':
+        #### Criação de Filtros ###
+        with st.expander("Filtrar por regionais"):
+            socioeconomico_escolha_regional = st.multiselect('Selecione as regionais:',
+                                                   dfsocioeconomico['REGIONAL'].unique(), dfsocioeconomico['REGIONAL'].unique())
+
+        socioeconomico_escolha_ano = st.select_slider('Filtrar escolas por ano de Implantação:',
+                                            options=dfsocioeconomico['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].unique(),
+                                            value=dfsocioeconomico['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].unique().max())
+        dfsocioeconomico_filtrado = dfsocioeconomico.loc[dfsocioeconomico['REGIONAL'].isin(socioeconomico_escolha_regional)].reset_index(drop=True)
+        lista_selecao_ano_implantacao = []
+        for item in dfsocioeconomico['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].unique():
+            if item <= socioeconomico_escolha_ano:
+                lista_selecao_ano_implantacao.append(item)
+        dfsocioeconomico_filtrado = dfsocioeconomico_filtrado.loc[dfsocioeconomico_filtrado['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].isin(
+            lista_selecao_ano_implantacao)].reset_index(drop=True)
+        ### Fim dos Filtros ###
+
+        selecao_aplicacao_socio = st.radio('Selecione a aplicação:', ('2019','2020'))
+        df_socioeconomico_media_regional = dfsocioeconomico_filtrado.groupby(by=['REGIONAL']).mean().reset_index()
+
+        if selecao_aplicacao_socio == '2019':
+
+            st.subheader('Socioeconomico SAEB 2019 - Média dos valores absolutos por regional')
+
+            infoniveis = {'Nível I': ["Até 3,00"], 'Nível II': ["3,00 a 4,00"], 'Nível III': ["4,00 a 4,50"],
+                          'Nível IV': ["4,50 a 5,00"], 'Nível V': ["5,00 a 5,50"]
+                , 'Nível VI': ["5,50 a 6,00"], 'Nível VII': ["6,00 a 7,00"], 'Nível VIII': ["7,00 ou mais"]}
+            index_label = ["Valor Absoluto"]
+            st.dataframe(pd.DataFrame(data=infoniveis, index=index_label), use_container_width= True)
+            with st.expander("Ler a descrição dos Níveis socioeconômico dos estudantes", expanded=False):
+                st.markdown(
+                    """ #### Nível I:
+        Este é o nível inferior da escala, no qual os estudantes têm dois ou mais desvios-padrão
+        abaixo da média nacional do Inse. Considerando a maioria dos estudantes, o pai/responsável
+        não completou o 5º ano do ensino fundamental e a mãe/responsável tem o 5º ano do ensino
+        fundamental incompleto ou completo. A maioria dos estudantes deste nível possui uma
+        geladeira, um ou dois quartos, uma televisão e um banheiro. Mas não possui muitos dos bens
+        e serviços pesquisados (i.e., computador, carro, wi-fi, mesa para estudar, garagem, microondas, aspirador de pó, 
+        máquina de lavar roupa e freezer).
+        #### Nível II:
+        Neste nível, os estudantes estão entre um e dois desvios-padrão abaixo da média nacional do
+        Inse. Considerando a maioria dos estudantes, a mãe/responsável e/ou o pai/responsável tem
+        o 5º ano do ensino fundamental incompleto ou completo. A maioria possui uma geladeira, um
+        ou dois quartos, uma televisão e um banheiro. Mas não possui muitos dos bens e serviços
+        pesquisados, exceto uma parte dos estudantes deste nível passa a ter freezer, máquina de
+        lavar roupa e três ou mais quartos para dormir em sua casa.
+        #### Nível III:
+        Neste nível, os estudantes estão entre meio e um desvio-padrão abaixo da média nacional
+        do Inse. Considerando a maioria dos estudantes, a mãe/responsável e o pai/responsável têm
+        o ensino fundamental incompleto ou completo e/ou ensino médio completo. A maioria possui
+        uma geladeira, um ou dois quartos, uma televisão, um banheiro, wi-fi e máquina de lavar
+        roupas, mas não possui computador, carro, garagem e aspirador de pó. Parte dos estudantes
+        passa a ter também freezer e forno de micro-ondas.
+        #### Nível IV:
+        Neste nível, os estudantes estão até meio desvio-padrão abaixo da média nacional do Inse.
+        Considerando a maioria dos estudantes, a mãe/responsável e o pai/responsável têm o ensino
+        fundamental incompleto ou completo e/ou ensino médio completo. A maioria possui uma
+        geladeira, um ou dois quartos, um banheiro, wi-fi, máquina de lavar roupas e freezer, mas não
+        possui aspirador de pó. Parte dos estudantes deste nível passa a ter também computador,
+        carro, mesa de estudos, garagem, forno de micro-ondas e uma ou duas televisões. .
+        #### Nível V:
+        Neste nível, os estudantes estão até meio desvio-padrão acima da média nacional do Inse.
+        Considerando a maioria dos estudantes, a mãe/responsável tem o ensino médio completo
+        ou ensino superior completo, o pai/responsável tem do ensino fundamental completo até o
+        ensino superior completo. A maioria possui uma geladeira, um ou dois quartos, um banheiro,
+        wi-fi, máquina de lavar roupas, freezer, um carro, garagem, forno de micro-ondas. Parte dos
+        estudantes deste nível passa a ter também dois banheiros. .
+        #### Nível VI:
+        Neste nível, os estudantes estão de meio a um desvio-padrão acima da média nacional do
+        Inse. Considerando a maioria dos estudantes, a mãe/responsável e/ou o pai/responsável têm
+        o ensino médio completo ou o ensino superior completo. A maioria possui uma geladeira,
+        dois ou três ou mais quartos, um banheiro, wi-fi, máquina de lavar roupas, freezer, um carro,
+        garagem, forno de micro-ondas, mesa para estudos e aspirador de pó. Parte dos estudantes
+        deste nível passa a ter também dois ou mais computadores e três ou mais televisões. 
+        #### Nível VII:
+        Neste nível, os estudantes estão de um a dois desvios-padrão acima da média nacional do
+        Inse. Considerando a maioria dos estudantes, a mãe/responsável e/ou o pai/responsável têm
+        ensino médio completo ou ensino superior completo. A maioria possui uma geladeira, três
+        ou mais quartos, um banheiro, wi-fi, máquina de lavar roupas, freezer, um carro, garagem,
+        forno de micro-ondas, mesa para estudos e aspirador de pó. Parte dos estudantes deste nível
+        passa a ter também dois ou mais carros, três ou mais banheiros e duas ou mais geladeiras.
+        #### Nível VIII:
+        Este é o nível superior da escala, no qual os estudantes estão dois desvios-padrão ou mais
+        acima da média nacional do Inse. Considerando a maioria dos estudantes, a mãe/responsável
+        e/ou o pai/responsável têm ensino superior completo. Além de possuírem os bens dos níveis
+        anteriores, a maioria dos estudantes deste nível passa a ter duas ou mais geladeiras, dois ou
+        mais computadores, três ou mais televisões, três ou mais banheiros e dois ou mais carros.
+
+                    """
+                )
+
+            fig = px.bar(df_socioeconomico_media_regional, x='REGIONAL', y='INSE_VALOR_ABSOLUTO',
+                         text_auto=True).update_xaxes(categoryorder='total descending')
+            fig.update_traces(marker_color='firebrick')
+            fig.update_layout(yaxis_title="INSE Valor Absoluto")
+            st.plotly_chart(fig)
+
+            dfquantidade_tipo_regional = dfsocioeconomico_filtrado[['REGIONAL', 'INSE_CLASSIFICACAO']].value_counts().to_frame().reset_index(level=['REGIONAL','INSE_CLASSIFICACAO'])
+            dfquantidade_tipo_regional.columns = ['REGIONAL', 'Nível', 'Quantidade']
+
+            fig = px.bar(dfquantidade_tipo_regional, x='REGIONAL', y='Quantidade', color='Nível', text_auto=True).update_xaxes(categoryorder='total descending')
+            # fig.update_traces(marker_color='firebrick')
+            fig.update_layout(yaxis_title="Quantidade de escolas")
+            st.plotly_chart(fig)
+
+
+        if selecao_aplicacao_socio == '2020':
+            st.write('Resultados ainda não disponibilizados pelo MEC')
+
+
+    if menu_socioeconomico == 'Ranking das escolas':
+        #### Criação de Filtros ###
+        with st.expander("Filtrar por regionais"):
+            socioeconomico_escolha_regional = st.multiselect('Selecione as regionais:',
+                                                             dfsocioeconomico['REGIONAL'].unique(),
+                                                             dfsocioeconomico['REGIONAL'].unique())
+
+        socioeconomico_escolha_ano = st.select_slider('Filtrar escolas por ano de Implantação:',
+                                                      options=dfsocioeconomico[
+                                                          'ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].unique(),
+                                                      value=dfsocioeconomico[
+                                                          'ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].unique().max())
+        dfsocioeconomico_filtrado = dfsocioeconomico.loc[
+            dfsocioeconomico['REGIONAL'].isin(socioeconomico_escolha_regional)].reset_index(drop=True)
+        lista_selecao_ano_implantacao = []
+        for item in dfsocioeconomico['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].unique():
+            if item <= socioeconomico_escolha_ano:
+                lista_selecao_ano_implantacao.append(item)
+        dfsocioeconomico_filtrado = dfsocioeconomico_filtrado.loc[
+            dfsocioeconomico_filtrado['ANO DE IMPLEMENTAÇÃO DO TEMPO INTEGRAL'].isin(
+                lista_selecao_ano_implantacao)].reset_index(drop=True)
+        ### Fim dos Filtros ###
+
+        selecao_aplicacao_socio = st.radio('Selecione a aplicação:', ('2019', '2020'))
+
+        if selecao_aplicacao_socio == '2019':
+            ##### Função que faz o TOP 10:
+            def top10(col):
+                fig = px.bar(dfsocioeconomico_filtrado[[col, 'ESCOLA']].sort_values(col, ascending=False).dropna(
+                    0).reset_index(drop=True).head(10), x='ESCOLA',
+                             y=col, text_auto=True)
+                fig.update_traces(marker_color='firebrick')
+                return st.plotly_chart(fig)
+
+
+            #### Função que faz os BOT10:
+            def bot10(col):
+                fig = px.bar(dfsocioeconomico_filtrado[[col, 'ESCOLA']].sort_values(col, ascending=True).dropna(
+                    0).reset_index(drop=True).head(10), x='ESCOLA',
+                             y=col, text_auto=True)
+                fig.update_traces(marker_color='firebrick')
+                return st.plotly_chart(fig)
+
+
+            st.header('Melhores resultados')
+
+            st.subheader('Melhores valores do Índice Socioeconomico 2019:')
+            top10('INSE_VALOR_ABSOLUTO')
+            st.subheader('Menores valores do Índice Socioeconomico 2019:')
+            bot10('INSE_VALOR_ABSOLUTO')
+
+    if menu_socioeconomico == 'Socioeconomico por Escola':
+        escolha_escola = st.selectbox('Selecione a escola:', dfsocioeconomico['ESCOLA'].unique())
+        dfsocioeconomico_filtrado = dfsocioeconomico.loc[dfsocioeconomico['ESCOLA'] == escolha_escola]
+
+        st.title(f'{escolha_escola}')
+
+        ####GRAFICOS####
+        regional_da_escola = str(dfsocioeconomico.loc[dfsocioeconomico['ESCOLA'] == escolha_escola]['REGIONAL'].values)[2:-2]
+
+        media_inse_regional = dfsocioeconomico.loc[dfsocioeconomico['REGIONAL'] == regional_da_escola]['INSE_VALOR_ABSOLUTO'].mean()
+
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=dfsocioeconomico_filtrado['ESCOLA'], y=dfsocioeconomico_filtrado['INSE_VALOR_ABSOLUTO'],
+                             name='Valor absoluto do INSE', text=dfsocioeconomico_filtrado['INSE_VALOR_ABSOLUTO']))
+        fig.update_traces(marker_color='firebrick')
+
+        fig.add_trace(go.Bar(y=[media_inse_regional],
+                             name='Média da Regional', text=[media_inse_regional]))
+
+        st.plotly_chart(fig)
+
