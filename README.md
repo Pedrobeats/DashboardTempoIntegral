@@ -1,5 +1,7 @@
 # Painel do Tempo Integral
 
+[Acesse o webapp aqui](https://tempointegrales.streamlit.app/)
+
 Esta é a base de informações do Tempo Integral com os dados de 2023. O intuito deste webapp é 
 **reunir e consolidar**
 todas as informações necessárias para consulta e análise das escolas em Tempo Integral de 2023, que hoje se 
