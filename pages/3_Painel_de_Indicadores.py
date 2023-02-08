@@ -1704,7 +1704,8 @@ if menu_geral == 'Indicadores Socioeconômicos':
             st.dataframe(pd.DataFrame(data=infoniveis, index=index_label), use_container_width= True)
             with st.expander("Ler a descrição dos Níveis socioeconômico dos estudantes", expanded=False):
                 st.markdown(
-                    """ #### Nível I:
+                    """ 
+        #### Nível I:
         Este é o nível inferior da escala, no qual os estudantes têm dois ou mais desvios-padrão
         abaixo da média nacional do Inse. Considerando a maioria dos estudantes, o pai/responsável
         não completou o 5º ano do ensino fundamental e a mãe/responsável tem o 5º ano do ensino
