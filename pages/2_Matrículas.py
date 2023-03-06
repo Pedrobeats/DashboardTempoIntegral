@@ -95,6 +95,9 @@ if tipo_relatorio == 'Soma de Matrículas do Tempo Integral':
 
         nova_df = soma.loc[soma['Escola'].isin(st.session_state.selecao_escola)]
         AgGrid(nova_df, theme='streamlit', fit_columns_on_grid_load=True)
+        soma_matriculas = nova_df['TotalMatriculados'].sum()
+        st.subheader(f'Total de Matrículas: {soma_matriculas}')
+
     if tipo_soma == 'Por Serie':
         st.session_state.selecao_serie = st.multiselect(
             'Escolha a série',
@@ -103,6 +106,8 @@ if tipo_relatorio == 'Soma de Matrículas do Tempo Integral':
 
         nova_df = soma.loc[soma['Serie'].isin(st.session_state.selecao_serie)]
         AgGrid(nova_df, theme='streamlit', fit_columns_on_grid_load=True)
+        soma_matriculas = nova_df['TotalMatriculados'].sum()
+        st.subheader(f'Total de Matrículas: {soma_matriculas}')
 
 
 
@@ -127,5 +132,8 @@ elif tipo_relatorio == 'Relatório Geral de Matrículas do Tempo Integral':
 
     st.subheader('Quantidade de Matrículas')
     AgGrid(soma2, fit_columns_on_grid_load=True)
+
+    soma_matriculas = soma2['TotalMatriculados'].sum()
+    st.subheader(f'Total de Matrículas: {soma_matriculas}')
 
 
