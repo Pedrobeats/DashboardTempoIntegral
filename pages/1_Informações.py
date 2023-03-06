@@ -64,7 +64,7 @@ if 'df1' not in st.session_state:
 ##### Sidebar geral #####
 menu_geral = st.sidebar.radio(
     "Selecione o que deseja ver:",
-    ('Informações Gerais sobre o Tempo Integral', 'Lista de Telefones/Contatos', 'Informação por Escola'))
+    ('Informações Gerais sobre o Tempo Integral', 'Lista de Telefones/Contatos'))
 #### Fim sidebar geral ##
 
 
