@@ -49,6 +49,7 @@ def carregar_dados():
     df_base2023 = pd.read_excel('base2023.xlsx', sheet_name=0)
     return df_dadosescola, df_dadosmatricula, df_mapadaeducacao, df_base2023
 
+df1, df2, df3, df4 = carregar_dados()
 st.session_state['df1'] = df1
 st.session_state['df2'] = df2
 st.session_state['df3'] = df3
