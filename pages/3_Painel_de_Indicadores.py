@@ -105,7 +105,7 @@ if menu_geral == 'Indicadores PAEBES':
         ### Fim dos Filtros ###
 
         ## Criação da DF de resultados do PAEBES por REGIONAL ##
-        df_paebes_media_regional = dfpaebes_filtrado.groupby(by=['REGIONAL']).mean().reset_index()
+        df_paebes_media_regional = dfpaebes_filtrado.groupby(by=['REGIONAL']).mean(numeric_only=True).reset_index()
 
         selecao_ano_paebes = st.radio('Selecione o ano:', ('2019', '2021'))
 
