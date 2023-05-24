@@ -94,7 +94,8 @@ if tipo_relatorio == 'Soma de Matrículas do Tempo Integral':
         )
 
         nova_df = soma.loc[soma['Escola'].isin(st.session_state.selecao_escola)]
-        AgGrid(nova_df, theme='streamlit', fit_columns_on_grid_load=True)
+        st.dataframe(nova_df)
+        #AgGrid(nova_df, theme='streamlit', fit_columns_on_grid_load=True)
         soma_matriculas = nova_df['TotalMatriculados'].sum()
         st.subheader(f'Total de Matrículas: {soma_matriculas}')
 
@@ -105,7 +106,8 @@ if tipo_relatorio == 'Soma de Matrículas do Tempo Integral':
         )
 
         nova_df = soma.loc[soma['Serie'].isin(st.session_state.selecao_serie)]
-        AgGrid(nova_df, theme='streamlit', fit_columns_on_grid_load=True)
+        st.dataframe(nova_df)
+        # AgGrid(nova_df, theme='streamlit', fit_columns_on_grid_load=True)
         soma_matriculas = nova_df['TotalMatriculados'].sum()
         st.subheader(f'Total de Matrículas: {soma_matriculas}')
 
@@ -131,7 +133,9 @@ elif tipo_relatorio == 'Relatório Geral de Matrículas do Tempo Integral':
     st.plotly_chart(grafico_px)
 
     st.subheader('Quantidade de Matrículas')
-    AgGrid(soma2, fit_columns_on_grid_load=True)
+    st.dataframe(soma2)
+
+    #AgGrid(soma2, fit_columns_on_grid_load=True)
 
     soma_matriculas = soma2['TotalMatriculados'].sum()
     st.subheader(f'Total de Matrículas: {soma_matriculas}')
