@@ -24,7 +24,7 @@ st.image(banner)
 if 'df1' not in st.session_state:
     ######## Carrega e limpa os dados #######
     @st.cache
-    def carregar_dados():
+    def carregar_dados(allow_output_mutation=True):
         df_dadosescola = pd.read_csv(
             'https://dados.es.gov.br/dataset/05f98028-92ba-45ca-9210-cb000b03c979/resource/5dd7951a-51c0-40f6-8809-14690b1b69a5/download/dadosescola.csv',
             sep=";", engine='python')
